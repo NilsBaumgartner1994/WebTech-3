@@ -157,6 +157,7 @@ aside {
 }
 
 .tweeter {
+  max-width: 100%;
   color: black;
 }
 
@@ -164,3 +165,4 @@ aside {
     color: rgb(176, 202, 219);
     margin-top: 1.5em;
 }
+
