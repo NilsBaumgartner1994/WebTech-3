@@ -67,7 +67,7 @@ class Users:
 
         with self.con:
             cur = self.con.cursor()
-            cur.executescript("INSERT INTO users VALUES('%s', '%s', '%s', '%s')" % (username, password, role, fullname))
+            cur.executescript("INSERT INTO users VALUES('%s', '%s', '%s', '%s')" % (username.replace('<', '&lt'), password.replace('<', '&lt'), role.replace('<', '&lt'), fullname.replace('<', '&lt')))
             return cur.rowcount
 
     def deleteUser(self, username):
