@@ -29,30 +29,35 @@ class MiniTwitterApp(App):
         self.server.add_route(r"/logout$", self.logout)
         self.server.add_route(r"/login$", self.login)
 
-    def show(self, request, response, pathmatch):
+    def show(self, request, response, pathmatch, message=''):
         """Process all requests. Dispatch POST to save method. Show tweets on GET requests."""
 
         if request.method.lower() == 'post':
             return self.save(request, response, pathmatch)
 
-        m = [] # list of tweets
         try:
-            f = open(self.datadir+'/minitwitter.data','r', encoding='utf-8')
+            user = request.session['user']
+        except (AttributeError, KeyError):
+            user = server.usermodel.AnonymousUser()
+
+        d = {'tweets': self.getTweets(), 'message': message, 'user': user }
+
+        response.send_template('minitwitter.tmpl', d)
+
+    def getTweets(self):
+        m = []  # list of tweets
+        try:
+            f = open(self.datadir + '/minitwitter.data', 'r', encoding='utf-8')
             lines = f.readlines()
             f.close()
         except IOError:
             # no tweets, yet
-            lines=[]
-
-        try:
-            message = request.params['message']
-        except KeyError:
-            message = ""
+            lines = []
 
         for line in lines:  # parse all lines and build array of tweets with dates
             try:
                 splitline = line.strip().split("#")
-                tweet = splitline[0]
+                tweet = splitline[0].replace("<", "&lt")
                 author = splitline[1]
                 date = splitline[2]
             except (ValueError, KeyError, IndexError):
@@ -63,13 +68,7 @@ class MiniTwitterApp(App):
             m.append({'date': 'No news', 'tweet': 'Create some.', 'author': 'The Minitwitter'})
         m.reverse()
 
-        try:
-            user = request.session['user']
-        except (AttributeError, KeyError):
-            user = server.usermodel.AnonymousUser()
-        d = {'tweets': m, 'message': message, 'user': user }
-
-        response.send_template('minitwitter.tmpl', d)
+        return m
 
     def save(self, request, response, pathmatch):
         """Process post request to save new tweet."""
@@ -89,14 +88,15 @@ class MiniTwitterApp(App):
             f.close()
         except IOError:
             raise StopProcessing(500, "Unable to connect to data file.")
-        
-        response.send_redirect("/?message={}".format(quote("Great! Now the world knows.")))
+
+        d = {'tweets': self.getTweets(), 'message': 'Great! Now the world knows.', 'user': request.session['user']}
+        response.send_template('minitwitter.tmpl', d)
 
     def logout(self, request, response, pathmatch):
         """Logout user and show a success message."""
         if request.session:
             request.session.destroy()
-        response.send_redirect("/?message=Successfully logged out.")
+        self.show(request, response, pathmatch, "Successfully logged out")
 
     def login(self, request, response, pathmatch):
         """Shoow login form if necessary or check provided credentials."""
@@ -105,11 +105,14 @@ class MiniTwitterApp(App):
         if '_username' in request.params and '_password' in request.params:
             users = server.usermodel.Users(self.db_connection)
             user = users.login(request.params['_username'], request.params['_password'])
-            if user:
+            if user is not None:
                 request.session['user'] = user  # save user to session
-                return response.send_redirect("/?message=Successfully logged in as <i>{}</i>.".format(request.params['_username']))
+                d = {'tweets': self.getTweets(), 'message': 'Successfully logged in as <i>' + request.params['_username'] + '</i>',
+                     'user': request.session['user']}
+
+                return response.send_template('minitwitter.tmpl', d)
             else:
-                return response.send_template('login.tmpl', {'message': 'Wrong username or password. Try again.'})
+                return response.send_template('login.tmpl', {'message': 'Wrong username or password. Try again.', 'user': server.usermodel.AnonymousUser()})
         # send login form
         return response.send_template('login.tmpl',{'user': server.usermodel.AnonymousUser()})
 

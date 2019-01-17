@@ -38,8 +38,10 @@ class Users:
 
         with self.con:
             cur = self.con.cursor()
-            query = "SELECT * FROM users WHERE username='{}' AND password='{}'".format(username, password)
-            cur.execute(query)
+            query = "SELECT * FROM users WHERE username=? AND password=?"
+
+            cur.execute(query, (username, password))
+
             row = cur.fetchone()
             log(2, "login({},{})={}".format(username, password, row if row else "[empty result]"))
 

@@ -127,7 +127,7 @@ class Session:
 
     def make_cookie(self):
         """Returns Cookie object for session id"""
-        return Cookie(self.cookiename, self.sessid, path='/')
+        return Cookie(self.cookiename, self.sessid, path='/', httpOnly=True)
     
     def make_delete_cookie(self):
         """Returns Cookie object to delete cookie"""

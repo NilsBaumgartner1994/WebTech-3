@@ -38,7 +38,7 @@ class UsermanagementApp(App):
         d = {
             'user': request.session['user'], # that's the current user
             'userlist': self.users.findUsers(),  # all users
-            'message': request.params['msg'] if 'msg' in request.params else ''
+            'message': ''
         }
         response.send_template(self.useradmin_template, d)
 
@@ -54,10 +54,16 @@ class UsermanagementApp(App):
             raise StopProcessing(400,"No username given.")
 
         if request.session['user'].username == username:
-            response.send_redirect('/useradmin?msg={}'.format("No, no, can't delete yourself."))
+            d = {'message': "No, no, can't delete yourself.",
+                 'userlist': self.users.findUsers(),
+                 'user': request.session['user']}
+            response.send_template('usermanagement.tmpl', d)
 
         success = self.users.deleteUser(username)
-        response.send_redirect('/useradmin?msg={}'.format("OK, Nutzer gelöscht." if success else "Uuups, Nutzer nicht gelöscht"))
+        d = {'message': "OK, Nutzer gelöscht." if success else "Uuups, Nutzer nicht gelöscht",
+             'userlist': self.users.findUsers(),
+             'user': request.session['user']}
+        response.send_template('usermanagement.tmpl', d)
 
     def create(self, request, response, pathmatch):
         """Create a new user."""
@@ -71,13 +77,22 @@ class UsermanagementApp(App):
             role = request.params['role']
             fullname = request.params['fullname']
         except KeyError:
-            response.send_redirect('/useradmin?msg={}'.format(quote('Es müssen alle Felder ausgefüllt werden!', encoding='utf-8')))
+            d = {'message': 'Es müssen alle Felder ausgefüllt werden!',
+                 'userlist': self.users.findUsers(),
+                 'user': request.session['user']}
+            response.send_template('usermanagement.tmpl', d)
             return
 
         try:
             self.users.createUser(username, password, role, fullname)
         except server.usermodel.UserError as err:
-            response.send_redirect('/useradmin?msg={}'.format(quote(err.msg, encoding='utf-8')))
+            d = {'message': err.msg,
+                 'userlist': self.users.findUsers(),
+                 'user': request.session['user']}
+            response.send_template('usermanagement.tmpl', d)
             return
 
-        response.send_redirect('/useradmin?msg={}'.format(quote("Ok! Nutzer %s angelegt." % (username),encoding='utf-8')))
+        d = {'message': "Ok! Nutzer " + username + " angelegt.",
+             'userlist': self.users.findUsers(),
+             'user': request.session['user']}
+        response.send_template('usermanagement.tmpl', d)

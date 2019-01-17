@@ -5,23 +5,27 @@ Nummer 1:
 
 - Kurzbeschreibung der Lücke:
     Username und Passwort unsicher durch Sql abfrage:
-    man kann user' OR '1'='1 eintippen und erhällt einen Gültigen user
+    man kann ' OR '1 eintippen und erhällt einen Gültigen user
 - Typ der Sicherheitslücke gem. Vorlesung:
     SQL Injection
 - Maßnahmen zu Behebung:
     SQLite interne Funktionen verwenden
 - geänderte Dateien:
+    usermodel.py Sqlite statement verwendet anstatt der Formats.
+    minitwitter.py weil mich das server abschmieren beim falschen eingeben aufgeregt hat
+    Es wurde kein user mitgeliefert
 
 Nummer 2:
 =========
 
 - Kurzbeschreibung der Lücke:
-    Html code oder Java Script code in der Url oder im Tweet ausführen
+    Html code oder Java Script code im Tweet ausführen
 - Typ der Sicherheitslücke gem. Vorlesung:
     XSS Lücke
 - Maßnahmen zu Behebung:
     Behebung durch überprüfung der Variablen auf Code
 - geänderte Dateien:
+    minitwitter.py < durch &lt ersetzen mit .replace("<", "&lt") beim Tweet
 
 Nummer 3:
 =========
@@ -34,6 +38,7 @@ Nummer 3:
 - Maßnahmen zu Behebung:
     Tweet auf Code überprüfen
 - geänderte Dateien:
+    wurde oben mit behoben sind aber zwei verschiedene Lücken
 
 
 Nummer 4:
@@ -46,8 +51,8 @@ Nummer 4:
     Session Hijacking
 - Maßnahmen zu Behebung:
     Cookie HTTP only machen.
-    wichtige Funktionen durch authentifizierung absichern.
 - geänderte Dateien:
+    session.py httpOnly flag bei Cookie einstellen
 
 Nummer 5:
 =========
@@ -60,6 +65,11 @@ Nummer 5:
 - Maßnahmen zu Behebung:
     Speichern der Variablen intern Handlen anstatt von extern
 - geänderte Dateien:
+    minitwitter.py request params durch templates ersetzt so kann nicht von aussen darauf Zugegriffen werden
+    und usermanagement.py genauso wie oben
+
+Weiterer CSRF angriff möglich durch <img src"localhost:8080/useradmin/delete/user1>" wenn der Admin den Tweet liest
+löscht er automatisch einen Nutzer.
 
 
 NebenInfos:
