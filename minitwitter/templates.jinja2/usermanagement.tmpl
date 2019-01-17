@@ -2,9 +2,129 @@
 
 {% block content %}
 
+<style>
+  #toggle {
+    width: 100px;
+    height: 100px;
+    background: #ccc;
+  }
+</style>
+<script>
+
+function setAside(content){
+  if (content == "") {
+    document.getElementById("demo").innerHTML = "";
+  } else {
+    document.getElementById("demo").innerHTML = "<aside><p>"+content+"</aside>";
+  }
+}
+
+function removeAside(){
+  setAside("");
+}
+
+function addUserToNewRow(username,fullname,role,password){
+    table = document.getElementById("usertable");
+    var row = table.insertRow(1);
+    row.id = "row-"+username;
+    var cellUN = row.insertCell(0);
+    cellUN.innerHTML = username;
+    var cellFN = row.insertCell(1);
+    cellFN.innerHTML = fullname;
+    var cellRO = row.insertCell(2);
+    cellRO.innerHTML = role;
+    var cellPW = row.insertCell(3);
+    cellPW.innerHTML = password;
+    var cellDN = row.insertCell(4);
+    cellDN.innerHTML = '<a href="useradmin/delete/'+username+'">Löschen</a></td>';
+    var cellDA = row.insertCell(5);
+    cellDA.innerHTML = `<button id="deleteButton-`+username+`" type="button" class="pure-button button-primary" onclick="deleteUser('`+username+`')">AJAX Delete</button>`;
+}
+
+function createUser(){
+    form = document.getElementById("createUserForm");
+    let formData = new FormData(form);
+    let parsedData = {};
+    for(let name of formData) {
+      if (typeof(parsedData[name[0]]) == "undefined") {
+        let tempdata = formData.getAll(name[0]);
+        if (tempdata.length > 1) {
+          parsedData[name[0]] = tempdata;
+        } else {
+          parsedData[name[0]] = tempdata[0];
+        }
+      }
+    }
+
+    let options = {};
+    switch ('post') {
+      case 'post':
+        options.body = JSON.stringify(parsedData);
+      case 'get':
+        options.method = this.method;
+        options.headers = {'Content-Type': 'application/json'};
+      break;
+    }
+
+    var XHR = new XMLHttpRequest();
+    var urlEncodedData = "";
+    var urlEncodedDataPairs = [];
+
+    for(var name in parsedData) {
+        urlEncodedDataPairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(parsedData[name]));
+    }
+    urlEncodedData = urlEncodedDataPairs.join('&').replace(/%20/g, '+'); // parse object into urlEncoded String
+
+    XHR.addEventListener('load', function(event) {
+        console.log('Data sent.');
+    });
+    XHR.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      console.log("Nice");
+      setAside(this.responseText);
+      addUserToNewRow(parsedData["username"],parsedData["fullname"],parsedData["role"],parsedData["password"]);
+    }
+    if (this.readyState == 4 && this.status == 400) {
+      setAside("Error: "+this.responseText);
+    }
+  };
+
+    XHR.open('POST', 'useradmin/createAJAX');
+    XHR.send(urlEncodedData); // send the form
+}
+
+function deleteUser(username) {
+  var userRow = document.getElementById("row-"+username); // an dieser stelle let oder var nutzen, damit bei mehrfachen aufruf die variable nicht überschrieben wird
+  var deleteButton = document.getElementById("deleteButton-"+username);
+  deleteButton.style.display = "none";
+  setAside("Send AJAX Request, this is to see it don't reload");
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      deleteButton.style.display = "block";
+      setAside(this.responseText);
+      setTimeout(removeAside, 5000);
+      //an dieser stelle nicht user row nehmen, da es sich verändert.
+      userRow.parentNode.removeChild(userRow);
+      //document.getElementById("row-"+username).parentNode.removeChild(document.getElementById("row-"+username));
+    }
+    if (this.readyState == 4 && this.status == 400) {
+      setAside("Error: "+this.responseText);
+
+    }
+  };
+  console.log("Try to: "+"useradmin/deleteAJAX/"+username+"");
+  xhttp.open("GET", "useradmin/deleteAJAX/"+username+"", true);
+  xhttp.send();
+}
+
+</script>
+
+<div id="demo"></div>
+
 	<h1>User Management</h1>
     {% autoescape off %}
-	<table class="pure-table">
+	<table id="usertable" class="pure-table">
 	    <thead>
     	    <tr>
     	        <th>Username</th>
@@ -12,16 +132,18 @@
     	        <th>Role</th>
     	        <th>Password</th>
     	        <th>Action</th>
+    	        <th>AJAX Action</th>
             </tr>
         </thead>
 
         {% for user in userlist: %}
-	    	<tr>
+	    	<tr id="row-{{user.username}}">
 			<td>{{user.username}}</td>
 			<td>{{user.fullname}}</td>
 			<td>{{user.role}}</td>
 			<td>{{user.password}}</td>
 			<td><a href="useradmin/delete/{{user.username}}">Löschen</a></td>
+			<td><button id="deleteButton-{{user.username}}" type="button" class="pure-button button-primary" onclick="deleteUser('{{user.username}}')">AJAX Delete</button></td>
 			</tr>
 		{% endfor %}
 
@@ -31,7 +153,7 @@
 
 	<h2>Create new user</h2>
 
-	<form action="useradmin/create" method="post" class="pure-form pure-form-stacked">
+	<form id="createUserForm" action="useradmin/create" method="post" class="pure-form pure-form-stacked">
 		<fieldset>
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" value="">
@@ -49,6 +171,7 @@
             <input type="text" id="fullname" name="fullname" size=40>
 
             <button type="submit" value="save" class="pure-button button-primary">Create user</button>
+            <button id="createButton" type="button" class="pure-button button-primary" onclick="createUser()">AJAX Create</button>
 		</fieldset>
 	</form>
     {% endautoescape %}
