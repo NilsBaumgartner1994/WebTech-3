@@ -10,6 +10,7 @@ from server.apps.usermanagement import UsermanagementApp
 from server.apps.static import StaticApp
 from server.middlewares.session import SessionMiddleware
 from server.log import log
+from server.tweetmodel import Tweets
 import server.usermodel
 
 import sqlite3 as sqlite
@@ -45,25 +46,13 @@ class MiniTwitterApp(App):
         response.send_template('minitwitter.tmpl', d)
 
     def getTweets(self):
+        tweets = Tweets(self.db_connection)
         m = []  # list of tweets
-        try:
-            f = open(self.datadir + '/minitwitter.data', 'r', encoding='utf-8')
-            lines = f.readlines()
-            f.close()
-        except IOError:
-            # no tweets, yet
-            lines = []
 
-        for line in lines:  # parse all lines and build array of tweets with dates
-            try:
-                splitline = line.strip().split("#")
-                tweet = splitline[0].replace("<", "&lt")
-                author = splitline[1]
-                date = splitline[2]
-            except (ValueError, KeyError, IndexError):
-                # ignore corrupt lines
-                continue
-            m.append({'date': date, 'tweet': tweet, 'author': author})
+        #closed xss lücke mit replace
+        for tweet in tweets.findTweets():  # parse all lines and build array of tweets with dates
+            m.append({'date': tweet.date, 'tweet': tweet.message.replace('<', '&lt'), 'author': tweet.username})
+
         if not m:
             m.append({'date': 'No news', 'tweet': 'Create some.', 'author': 'The Minitwitter'})
         m.reverse()
@@ -76,16 +65,14 @@ class MiniTwitterApp(App):
         if 'user' not in request.session:
             raise StopProcessing(400, "You need to be logged in.")
 
-        import datetime
-        now = datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M:%S")
         try:
             status = request.params['status']
         except KeyError:
             raise StopProcessing(500, "No status given.")
+
         try:
-            f=open(self.datadir+'/minitwitter.data','a', encoding='utf-8')
-            f.write(status + "#"+ request.session['user'].fullname + "#" + now + "\n")
-            f.close()
+            tweets = Tweets(self.db_connection)
+            tweets.createTweet(request.session['user'].fullname, status)
         except IOError:
             raise StopProcessing(500, "Unable to connect to data file.")
 
