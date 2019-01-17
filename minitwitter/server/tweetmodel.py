@@ -1,6 +1,5 @@
-from server.log import log
 import sqlite3 as sqlite
-import re
+import unittest
 
 
 class TweetError(Exception):
@@ -16,7 +15,7 @@ class Tweets:
     def __init__(self, db_connection=None):
 
         if not db_connection:
-            self.con = sqlite.connect('tweet.db')
+            self.con = sqlite.connect(':memory:')
             self.con.row_factory = sqlite.Row
         else:
             self.con = db_connection  # assign an open db connection
@@ -59,7 +58,7 @@ class Tweets:
             query = "SELECT * FROM tweets WHERE username=?"
             cur.execute(query, (username,))
             row = cur.fetchone()
-            log(2, "findByUsername(%s)=%s" % (username, row if row else "[empty result]"))
+
 
         if row:
             return Tweet(row)
@@ -85,16 +84,37 @@ class Tweet:
         for key in row.keys():  # set all other parameters as object attributes
             setattr(self, key, row[key])
 
+class Test(unittest.TestCase):
 
+    def setUp(self):
+        self.db = Tweets()
+        self.db.createTweet("joarndt", "hey guys")
+
+    def tearDown(self):
+        return
+
+    def test_create(self):
+        self.db.createTweet("Fizzule", "heyo")
+        tweet = self.db.findByUsername("Fizzule")
+        self.assertEqual(tweet.username, "Fizzule")
+        self.assertEqual(tweet.message, "heyo")
+
+
+    def test_findTweet(self):
+        tweet = self.db.findByUsername("joarndt")
+        self.assertEqual(tweet.username, "joarndt")
+        self.assertEqual(tweet.message, "hey guys")
+
+    def test_delete(self):
+        self.db.deleteTweet("joarndt", "hey guys")
+        tweet = self.db.findByUsername('joarndt')
+        self.assertEqual(tweet, None)
 
 if __name__ == '__main__':
-    db = Tweets()
-    db.createTweet("joarndt", "hey guys")
-    db.createTweet("joarndt", "luuuuul")
+    unittest.main()
 
 
-    for x in db.findTweets():
-        print(x.username, ": ", x.message, " ", x.date)
+
 
 
 
