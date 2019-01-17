@@ -15,6 +15,7 @@ import server.usermodel
 
 import sqlite3 as sqlite
 from urllib.parse import quote, unquote
+import json
 
 
 class MiniTwitterApp(App):
@@ -29,6 +30,8 @@ class MiniTwitterApp(App):
         self.server.add_route(r"/?$", self.show)
         self.server.add_route(r"/logout$", self.logout)
         self.server.add_route(r"/login$", self.login)
+        self.server.add_route(r"/getLastTweetTime", self.getLastTweetTime)
+        self.server.add_route(r"/getAllTweetsAJAX",self.getTweetsAJAX)
 
     def show(self, request, response, pathmatch, message=''):
         """Process all requests. Dispatch POST to save method. Show tweets on GET requests."""
@@ -44,6 +47,16 @@ class MiniTwitterApp(App):
         d = {'tweets': self.getTweets(), 'message': message, 'user': user }
 
         response.send_template('minitwitter.tmpl', d)
+
+    def getLastTweetTime(self, request, response, pathmatch):
+        tweets = Tweets(self.db_connection)
+        lastTime = ""
+        for tweet in tweets.findTweets():
+            lastTime = tweet.date #to get most recent
+        response.send(200, None, str(lastTime))
+
+    def getTweetsAJAX(self, request, response, pathmatch):
+        response.send(200, None, json.dumps(self.getTweets()))
 
     def getTweets(self):
         tweets = Tweets(self.db_connection)
