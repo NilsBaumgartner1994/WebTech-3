@@ -1,0 +1,12 @@
+
+minitwitter/sessions/
+
+minitwitter/server/__pycache__/
+
+minitwitter/server/apps/__pycache__/
+
+minitwitter/server/templating/__pycache__/
+
+minitwitter/server/middlewares/__pycache__/
+
+minitwitter/data/minitwitter\.data
