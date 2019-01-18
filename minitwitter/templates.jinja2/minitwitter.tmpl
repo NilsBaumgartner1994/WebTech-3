@@ -6,6 +6,23 @@
 var timeToCheckForNewUpdated = 5000;    //recheck time
 var lastUpdate = "";
 
+// https://stackoverflow.com/questions/40893537/fetch-set-cookies-and-csrf
+function getCookie(name) {
+  if (!document.cookie) {
+    return null;
+  }
+
+  const xsrfCookies = document.cookie.split(';')
+    .map(c => c.trim())
+    .filter(c => c.startsWith(name + '='));
+
+  if (xsrfCookies.length === 0) {
+    return null;
+  }
+
+  return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+}
+
 //Methode which is calles when page is fully loaded
 function allLoaded(){
     setInterval(function() {
@@ -72,6 +89,8 @@ function getAllTweetsViaAJAX(lastUpdate){
     }
   };
   xhttp.open("POST", "getAllTweetsAJAX", true);
+  const csrfToken = getCookie('csrftoken');
+    XHR.setRequestHeader('csrftoken', csrfToken);
   xhttp.send();
 }
 
@@ -111,6 +130,8 @@ function getLastestTweetPostTime(){
     }
   };
   xhttp.open("POST", "getLastTweetTime", true);
+  const csrfToken = getCookie('csrftoken');
+    XHR.setRequestHeader('csrftoken', csrfToken);
   xhttp.send();
 }
 

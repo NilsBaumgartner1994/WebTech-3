@@ -11,6 +11,23 @@
 </style>
 <script>
 
+// https://stackoverflow.com/questions/40893537/fetch-set-cookies-and-csrf
+function getCookie(name) {
+  if (!document.cookie) {
+    return null;
+  }
+
+  const xsrfCookies = document.cookie.split(';')
+    .map(c => c.trim())
+    .filter(c => c.startsWith(name + '='));
+
+  if (xsrfCookies.length === 0) {
+    return null;
+  }
+
+  return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+}
+
 //Funktion um eine Tolle Nachrichten Box zu zeigen
 function setAside(content){
   if (content == "") { //entfernen wenn kein inhalt
@@ -60,16 +77,6 @@ function createUser(){
       }
     }
 
-    let options = {};
-    switch ('post') { //an dieser stelle immer post
-      case 'post':
-        options.body = JSON.stringify(parsedData);
-      case 'get': //falls man noch get brauchen wuerde fuer andere zwecke
-        options.method = this.method;
-        options.headers = {'Content-Type': 'application/json'};
-      break;
-    }
-
     //Daten gesammelt, nun absenden
     var XHR = new XMLHttpRequest();
     var urlEncodedData = "";
@@ -96,6 +103,8 @@ function createUser(){
     };
 
     XHR.open('POST', 'useradmin/createAJAX'); //wohin absenden? bzw. welche methode callen
+    const csrfToken = getCookie('csrftoken');
+    XHR.setRequestHeader('csrftoken', csrfToken);
     XHR.send(urlEncodedData); // send the form
 }
 
@@ -142,6 +151,8 @@ function deleteUser(username) {
     };
 
     XHR.open('POST', 'useradmin/deleteAJAX'); //wohin absenden? bzw. welche methode callen
+    const csrfToken = getCookie('csrftoken');
+    XHR.setRequestHeader('csrftoken', csrfToken);
     XHR.send(urlEncodedData); // send the form
 }
 
