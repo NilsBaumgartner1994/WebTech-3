@@ -13,18 +13,20 @@ class CSRFMiddleware(webserver.Middleware):
         super().__init__()
 
     def process_request(self, request, response):
-        """"""
-        if self.token == "No CSRF Token!":
-            return self.wrong_csrf()
+        """Check CSRF-Token and create new if necessary"""
         if request.method == 'POST' or request.method == 'post':
+            if self.token == "No CSRF Token!":
+                return self.wrong_csrf()
             if cookiename not in request.cookies:
                 return self.wrong_csrf()
             if request.cookies[cookiename] == "No CSRF Token!":
                 return self.wrong_csrf()
             if not request.cookies[cookiename] == self.token:
                 return self.wrong_csrf()
+            else:
+                log(3, "CSRF-Token correct.")
         else:
-            if cookiename not in request.cookies:
+            if cookiename not in request.cookies or request.cookies[cookiename] == "No CSRF Token!":
                 self.token = self.create_token()
                 response.add_cookie(self.make_cookie(self.token))
 
@@ -33,12 +35,13 @@ class CSRFMiddleware(webserver.Middleware):
         response.add_cookie(self.make_cookie(self.token))
 
     def create_token(self):
+        """Create new CSRF-Token"""
         return "Created Token"
 
     def make_cookie(self, value):
-        """Returns Cookie object for nightmode"""
-        return webserver.Cookie("csrftoken", value, path='/')
-        #return webserver.Cookie(self.cookiename, value, path='/', expires=webserver.Cookie.expiry_date(30))
+        """Returns Cookie object for CSRF"""
+        return webserver.Cookie("csrftoken", value, path='/', httpOnly=True)
+        #return webserver.Cookie(self.cookiename, value, path='/', httpOnly=True, expires=webserver.Cookie.expiry_date(30))
 
     def wrong_csrf(self):
         """ Respond that no Authentification is given/there"""

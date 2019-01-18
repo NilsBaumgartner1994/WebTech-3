@@ -130,7 +130,7 @@ if __name__ == '__main__':
     s.set_templating_path("templates.jinja2")
 
     s.add_middleware(SessionMiddleware())
-    s.add_middleware(SessionMiddleware())
+    s.add_middleware(CSRFMiddleware())
 
     s.add_app(UsermanagementApp(db_connection=db))   # Sub-App: create, change, delete users. (code in server/apps)
     s.add_app(StaticApp(prefix='static', path='static'))  # deliver static files
