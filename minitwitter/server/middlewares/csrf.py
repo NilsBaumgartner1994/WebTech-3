@@ -25,11 +25,14 @@ class CSRFMiddleware(webserver.Middleware):
             self.sessid = request.session.sessid
             self.token = self.create_token()
         if request.method == 'POST' or request.method == 'post':
+            pprint(request.params)
             if not self.token:
                 return self.wrong_csrf()
-            if cookiename not in request.cookies:
+            if cookiename not in request.params and cookiename not in request.headers:
                 return self.wrong_csrf()
-            if request.cookies[cookiename] != self.token:
+            if cookiename in request.params and request.params[cookiename] != self.token:
+                return self.wrong_csrf()
+            if cookiename in request.headers and request.headers[cookiename] != self.token:
                 return self.wrong_csrf()
             else:
                 log(3, "CSRF-Token correct.")
@@ -47,7 +50,7 @@ class CSRFMiddleware(webserver.Middleware):
 
     def make_cookie(self, value):
         """Returns Cookie object for CSRF"""
-        return webserver.Cookie(cookiename, value, path='/', httpOnly=True)
+        return webserver.Cookie(cookiename, value, path='/', httpOnly=False)
 
     def delete_cookie(self):
         """Returns Expired Cookie object for CSRF"""
