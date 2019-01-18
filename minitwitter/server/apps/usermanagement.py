@@ -6,6 +6,7 @@ import server.usermodel
 import json
 from urllib.parse import quote
 import time
+from pprint import pprint
 
 
 class UsermanagementApp(App):
@@ -124,6 +125,7 @@ class UsermanagementApp(App):
         response.send_template('usermanagement.tmpl', d)
 
     def createAJAX(self, request, response, pathmatch):
+        """token = request.headers["csrf-token"]"""
         """Create a new user. Same as normal just with smaller outputs for ajax"""
         print("Receiving an AJAX Request")
 
