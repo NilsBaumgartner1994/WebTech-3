@@ -71,7 +71,7 @@ function getAllTweetsViaAJAX(lastUpdate){
       return;
     }
   };
-  xhttp.open("GET", "getAllTweetsAJAX", true);
+  xhttp.open("POST", "getAllTweetsAJAX", true);
   xhttp.send();
 }
 
@@ -110,7 +110,7 @@ function getLastestTweetPostTime(){
       //besser einfach nix tun
     }
   };
-  xhttp.open("GET", "getLastTweetTime", true);
+  xhttp.open("POST", "getLastTweetTime", true);
   xhttp.send();
 }
 

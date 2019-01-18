@@ -28,7 +28,7 @@ class UsermanagementApp(App):
         self.add_route(r'useradmin/create', self.create)
         self.add_route(r'useradmin/createAJAX', self.createAJAX)
         self.add_route(r'useradmin/delete/(?P<username>.*)', self.delete)           #Neue Route
-        self.add_route(r'useradmin/deleteAJAX/(?P<username>.*)', self.deleteAJAX)   #Neue Route
+        self.add_route(r'useradmin/deleteAJAX', self.deleteAJAX)   #Neue Route
 
     def show(self, request, response, pathmatch):
         """List users and creation form."""
@@ -76,7 +76,7 @@ class UsermanagementApp(App):
             response.send(400,None, "You need to be logged in.")
 
         try:
-            username = pathmatch.group('username')
+            username = request.params['username']
         except IndexError:
             response.send(400, None, "No username given")
 
