@@ -27,8 +27,8 @@ class UsermanagementApp(App):
         self.add_route(r'useradmin', self.show)
         self.add_route(r'useradmin/create', self.create)
         self.add_route(r'useradmin/createAJAX', self.createAJAX)
-        self.add_route(r'useradmin/delete/(?P<username>.*)', self.delete)
-        self.add_route(r'useradmin/deleteAJAX/(?P<username>.*)', self.deleteAJAX)
+        self.add_route(r'useradmin/delete/(?P<username>.*)', self.delete)           #Neue Route
+        self.add_route(r'useradmin/deleteAJAX/(?P<username>.*)', self.deleteAJAX)   #Neue Route
 
     def show(self, request, response, pathmatch):
         """List users and creation form."""
@@ -70,7 +70,7 @@ class UsermanagementApp(App):
         response.send_template('usermanagement.tmpl', d)
 
     def deleteAJAX(self, request, response, pathmatch):
-        """Delete a user."""
+        """Delete a user same as normal, just with smaller outputs for ajax."""
 
         if 'user' not in request.session:
             response.send(400,None, "You need to be logged in.")
@@ -124,7 +124,7 @@ class UsermanagementApp(App):
         response.send_template('usermanagement.tmpl', d)
 
     def createAJAX(self, request, response, pathmatch):
-        """Create a new user."""
+        """Create a new user. Same as normal just with smaller outputs for ajax"""
         print("Receiving an AJAX Request")
 
         if 'user' not in request.session:

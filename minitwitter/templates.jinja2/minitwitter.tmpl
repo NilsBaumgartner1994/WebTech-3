@@ -3,15 +3,17 @@
 {% block content %}
 
 <script>
-var timeToCheckForNewUpdated = 5000;
+var timeToCheckForNewUpdated = 5000;    //recheck time
 var lastUpdate = "";
 
+//Methode which is calles when page is fully loaded
 function allLoaded(){
     setInterval(function() {
-        getLastestTweetPostTime();
+        getLastestTweetPostTime(); //start loop
     }, timeToCheckForNewUpdated);
 }
 
+//returns the tweet format, mayby put into .py?
 function getTweetFormat(date,message,author){
    html = `<section class="post">
            <header class="post-header">
@@ -24,6 +26,7 @@ function getTweetFormat(date,message,author){
    return html;
 }
 
+//formats a dateString
 function getDateFormat(dateString){
     var reggie = /(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2}):(\d{2})/;
     var dateArray = reggie.exec(dateString);
@@ -38,8 +41,9 @@ function getDateFormat(dateString){
     return dateObject;
 }
 
+//Adds only latest Tweets
 function addOnlyNewTweets(lastUpdate, tweets){
-    var jsonTweets = JSON.parse(tweets);
+    var jsonTweets = JSON.parse(tweets); //tweets as json
     var arrayLength = jsonTweets.length;
     var newHTMLContent = "";
     for (var i = 0; i < arrayLength; i++) {
@@ -48,21 +52,22 @@ function addOnlyNewTweets(lastUpdate, tweets){
         message = tweet["tweet"];
         author = tweet["author"];
         if(getDateFormat(date)>getDateFormat(lastUpdate)){ //only if new tweets
-           newHTMLContent = newHTMLContent+getTweetFormat(date,message,author);
+           newHTMLContent = newHTMLContent+getTweetFormat(date,message,author); //add to our html
         }
     }
-    var htmlTweets = document.getElementById("javascriptTweets");
-    htmlTweets.innerHTML = newHTMLContent+htmlTweets.innerHTML;
+    var htmlTweets = document.getElementById("javascriptTweets"); //where to put new tweets, on top obv.
+    htmlTweets.innerHTML = newHTMLContent+htmlTweets.innerHTML; //put them there
 }
 
+//gets all Tweets via AJAX and puts them on screen
 function getAllTweetsViaAJAX(lastUpdate){
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
+    if (this.readyState == 4 && this.status == 200) { //if successfull
       var tweets = this.responseText;
-      addOnlyNewTweets(lastUpdate,tweets);
+      addOnlyNewTweets(lastUpdate,tweets); //show them on browser
     }
-    if (this.readyState == 4 && this.status == 400) {
+    if (this.readyState == 4 && this.status == 400) {//if error, just ignore it
       return;
     }
   };
@@ -70,34 +75,37 @@ function getAllTweetsViaAJAX(lastUpdate){
   xhttp.send();
 }
 
+//Method which will start getting all tweets and setting last update
 function getNewTweetsAndShowThem(lastUpdate){
     var copyOfLastUpdate = lastUpdate; //besser eine kopie erstellen falls es ueberschrieben wird
     getAllTweetsViaAJAX(copyOfLastUpdate);
 }
 
+//Checks if newer tweets found by given time
 function checkForNewUpdated(receivedLatestTime){
 
    if(lastUpdate == ""){ //first time page Loaded
      lastUpdate = receivedLatestTime;
      return;
    }
-   if(lastUpdate != receivedLatestTime){
-     console.log("geil was neues");
+   if(lastUpdate != receivedLatestTime){ //if newer update time
+     console.log("super was neues");
      getNewTweetsAndShowThem(lastUpdate);
-     lastUpdate = receivedLatestTime;
+     lastUpdate = receivedLatestTime; //update last seend time
    } else {
      console.log("nix neues");
    }
 
 }
 
+//Method to get Latest Time of Tweet
 function getLastestTweetPostTime(){
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      checkForNewUpdated(this.responseText);
+    if (this.readyState == 4 && this.status == 200) { //if successfull
+      checkForNewUpdated(this.responseText); //check if newer
     }
-    if (this.readyState == 4 && this.status == 400) {
+    if (this.readyState == 4 && this.status == 400) { //just ignore the error
       //checkForNewUpdated(this.responseText);
       //besser einfach nix tun
     }
@@ -106,7 +114,7 @@ function getLastestTweetPostTime(){
   xhttp.send();
 }
 
-window.onload = allLoaded();
+window.onload = allLoaded(); //start my script to start the loop
 </script>
 
     <h1 class="content-subhead">The Tweets</h1>

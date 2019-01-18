@@ -11,21 +11,24 @@
 </style>
 <script>
 
+//Funktion um eine Tolle Nachrichten Box zu zeigen
 function setAside(content){
-  if (content == "") {
+  if (content == "") { //entfernen wenn kein inhalt
     document.getElementById("demo").innerHTML = "";
   } else {
     document.getElementById("demo").innerHTML = "<aside><p>"+content+"</aside>";
   }
 }
 
+//Hilfsmethode zum Entfernen der MessageBox
 function removeAside(){
   setAside("");
 }
 
+//Methode um einen neuen Benutzer in die Tabelle oben einzufügen
 function addUserToNewRow(username,fullname,role,password){
-    table = document.getElementById("usertable");
-    var row = table.insertRow(1);
+    table = document.getElementById("usertable"); //die tabelle
+    var row = table.insertRow(1); //hinter den tabellen koepfen einfuegen
     row.id = "row-"+username;
     var cellUN = row.insertCell(0);
     cellUN.innerHTML = username;
@@ -36,16 +39,17 @@ function addUserToNewRow(username,fullname,role,password){
     var cellPW = row.insertCell(3);
     cellPW.innerHTML = password;
     var cellDN = row.insertCell(4);
-    cellDN.innerHTML = '<a href="useradmin/delete/'+username+'">Löschen</a></td>';
-    var cellDA = row.insertCell(5);
+    cellDN.innerHTML = '<a href="useradmin/delete/'+username+'">Löschen</a></td>'; //der normale delete button
+    var cellDA = row.insertCell(5); //der ajax delete button
     cellDA.innerHTML = `<button id="deleteButton-`+username+`" type="button" class="pure-button button-primary" onclick="deleteUser('`+username+`')">AJAX Delete</button>`;
 }
 
+//Create User via AJAX
 function createUser(){
-    form = document.getElementById("createUserForm");
+    form = document.getElementById("createUserForm"); //form auslesen
     let formData = new FormData(form);
     let parsedData = {};
-    for(let name of formData) {
+    for(let name of formData) { //nur gefuellte und bekannte felder fuellen
       if (typeof(parsedData[name[0]]) == "undefined") {
         let tempdata = formData.getAll(name[0]);
         if (tempdata.length > 1) {
@@ -57,63 +61,66 @@ function createUser(){
     }
 
     let options = {};
-    switch ('post') {
+    switch ('post') { //an dieser stelle immer post
       case 'post':
         options.body = JSON.stringify(parsedData);
-      case 'get':
+      case 'get': //falls man noch get brauchen wuerde fuer andere zwecke
         options.method = this.method;
         options.headers = {'Content-Type': 'application/json'};
       break;
     }
 
+    //Daten gesammelt, nun absenden
     var XHR = new XMLHttpRequest();
     var urlEncodedData = "";
     var urlEncodedDataPairs = [];
 
-    for(var name in parsedData) {
+    for(var name in parsedData) { //alle form daten encoden
         urlEncodedDataPairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(parsedData[name]));
     }
     urlEncodedData = urlEncodedDataPairs.join('&').replace(/%20/g, '+'); // parse object into urlEncoded String
 
-    XHR.addEventListener('load', function(event) {
+    XHR.addEventListener('load', function(event) { //wenn daten gesendet
         console.log('Data sent.');
     });
-    XHR.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      console.log("Nice");
-      setAside(this.responseText);
-      addUserToNewRow(parsedData["username"],parsedData["fullname"],parsedData["role"],parsedData["password"]);
+    XHR.onreadystatechange = function() { //wenn sich der state aendert
+    if (this.readyState == 4 && this.status == 200) { //wenn erfolgreich
+      //console.log("Nice");
+      setAside(this.responseText); //popup message
+      setTimeout(removeAside, 5000); //lass diese nach einiger zeit verschiwnden
+      addUserToNewRow(parsedData["username"],parsedData["fullname"],parsedData["role"],parsedData["password"]); //tabelle anpassen
     }
-    if (this.readyState == 4 && this.status == 400) {
-      setAside("Error: "+this.responseText);
+    if (this.readyState == 4 && this.status == 400) { //wenn fehler
+      setAside("Error: "+this.responseText); //zeige diesen
     }
   };
 
-    XHR.open('POST', 'useradmin/createAJAX');
+    XHR.open('POST', 'useradmin/createAJAX'); //wohin absenden? bzw. welche methode callen
     XHR.send(urlEncodedData); // send the form
 }
 
+//Methode zum loeschen eines users via AJAX
 function deleteUser(username) {
   var userRow = document.getElementById("row-"+username); // an dieser stelle let oder var nutzen, damit bei mehrfachen aufruf die variable nicht überschrieben wird
   var deleteButton = document.getElementById("deleteButton-"+username);
-  deleteButton.style.display = "none";
-  setAside("Send AJAX Request, this is to see it don't reload");
+  deleteButton.style.display = "none"; //erlaube kein doppeltes loeschen
+  setAside("Send AJAX Request, this is to see it don't reload"); //just to show the user we are alive
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      deleteButton.style.display = "block";
-      setAside(this.responseText);
-      setTimeout(removeAside, 5000);
+    if (this.readyState == 4 && this.status == 200) { //wenn erfolgreich
+      deleteButton.style.display = "block"; //zeige den loesch block, eig. egal da die reihe eh geloescht wird
+      setAside(this.responseText); //popup message
+      setTimeout(removeAside, 5000); //lass diese nach einiger zeit verschiwnden
       //an dieser stelle nicht user row nehmen, da es sich verändert.
       userRow.parentNode.removeChild(userRow);
-      //document.getElementById("row-"+username).parentNode.removeChild(document.getElementById("row-"+username));
+      //document.getElementById("row-"+username).parentNode.removeChild(document.getElementById("row-"+username)); //entferne zeile
     }
     if (this.readyState == 4 && this.status == 400) {
       setAside("Error: "+this.responseText);
 
     }
   };
-  console.log("Try to: "+"useradmin/deleteAJAX/"+username+"");
+  //console.log("Try to: "+"useradmin/deleteAJAX/"+username+"");
   xhttp.open("GET", "useradmin/deleteAJAX/"+username+"", true);
   xhttp.send();
 }

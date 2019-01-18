@@ -49,6 +49,7 @@ class MiniTwitterApp(App):
         response.send_template('minitwitter.tmpl', d)
 
     def getLastTweetTime(self, request, response, pathmatch):
+        """Gets time of latest tweet, so we can see if theres something new"""
         tweets = Tweets(self.db_connection)
         lastTime = ""
         for tweet in tweets.findTweets():
@@ -56,6 +57,7 @@ class MiniTwitterApp(App):
         response.send(200, None, str(lastTime))
 
     def getTweetsAJAX(self, request, response, pathmatch):
+        """Returns all Tweets in json for AJAX"""
         response.send(200, None, json.dumps(self.getTweets()))
 
     def getTweets(self):
