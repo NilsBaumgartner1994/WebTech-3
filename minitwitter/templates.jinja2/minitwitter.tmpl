@@ -90,7 +90,7 @@ function getAllTweetsViaAJAX(lastUpdate){
   };
   xhttp.open("POST", "getAllTweetsAJAX", true);
   const csrfToken = getCookie('csrftoken');
-    XHR.setRequestHeader('csrftoken', csrfToken);
+  xhttp.setRequestHeader('csrftoken', csrfToken);
   xhttp.send();
 }
 

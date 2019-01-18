@@ -26,7 +26,7 @@ function getCookie(name) {
   return decodeURIComponent(xsrfCookies[0].split('=')[1]);
 }
 
-function allLoaded(){
+function setPostTwitterToken(){
   var token = getCookie("csrftoken");
   var inputF = document.getElementById("tweetPostinputToken");
   inputF.value = token;
@@ -35,7 +35,7 @@ function allLoaded(){
 
 document.onreadystatechange = function () {
   if (document.readyState == "interactive") {
-    allLoaded();
+    setPostTwitterToken();
   }
 }
 </script>
