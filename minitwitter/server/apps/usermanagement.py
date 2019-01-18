@@ -125,7 +125,7 @@ class UsermanagementApp(App):
         response.send_template('usermanagement.tmpl', d)
 
     def createAJAX(self, request, response, pathmatch):
-        """token = request.headers["csrf-token"]"""
+        """token = request.headers["csrftoken"]"""
         """Create a new user. Same as normal just with smaller outputs for ajax"""
         print("Receiving an AJAX Request")
 
