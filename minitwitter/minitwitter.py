@@ -9,6 +9,7 @@ from server.apps.static import StaticApp
 from server.apps.usermanagement import UsermanagementApp
 from server.apps.static import StaticApp
 from server.middlewares.session import SessionMiddleware
+from server.middlewares.csrf import CSRFMiddleware
 from server.log import log
 from server.tweetmodel import Tweets
 import server.usermodel
@@ -128,6 +129,7 @@ if __name__ == '__main__':
     s.set_templating("jinja2")
     s.set_templating_path("templates.jinja2")
 
+    s.add_middleware(SessionMiddleware())
     s.add_middleware(SessionMiddleware())
 
     s.add_app(UsermanagementApp(db_connection=db))   # Sub-App: create, change, delete users. (code in server/apps)
