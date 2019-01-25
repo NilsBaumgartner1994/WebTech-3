@@ -54,7 +54,7 @@ class UsermanagementApp(App):
             raise StopProcessing(400, "You need to be logged in.")
 
         try:
-            username = pathmatch.group('username')
+            username = pathmatch.group('username').replace('<', '&lt')
         except IndexError:
             raise StopProcessing(400,"No username given.")
 
@@ -77,7 +77,7 @@ class UsermanagementApp(App):
             response.send(400,None, "You need to be logged in.")
 
         try:
-            username = request.params['username']
+            username = request.params['username'].replace('<', '&lt')
         except IndexError:
             response.send(400, None, "No username given")
 
@@ -99,10 +99,10 @@ class UsermanagementApp(App):
             raise StopProcessing(400, "You need to be logged in.")
 
         try:
-            username = request.params['username']
-            password = request.params['password']
-            role = request.params['role']
-            fullname = request.params['fullname']
+            username = request.params['username'].replace('<', '&lt')
+            password = request.params['password'].replace('<', '&lt')
+            role = request.params['role'].replace('<', '&lt')
+            fullname = request.params['fullname'].replace('<', '&lt')
         except KeyError:
             d = {'message': 'Es müssen alle Felder ausgefüllt werden!',
                  'userlist': self.users.findUsers(),
@@ -132,10 +132,10 @@ class UsermanagementApp(App):
         if 'user' not in request.session:
             response.send(400, None, "You need to be logged in.")
         try:
-            username = request.params['username']
-            password = request.params['password']
-            role = request.params['role']
-            fullname = request.params['fullname']
+            username = request.params['username'].replace('<', '&lt')
+            password = request.params['password'].replace('<', '&lt')
+            role = request.params['role'].replace('<', '&lt')
+            fullname = request.params['fullname'].replace('<', '&lt')
         except KeyError:
             d = {'message': 'Es müssen alle Felder ausgefüllt werden!',
                  'userlist': self.users.findUsers(),
